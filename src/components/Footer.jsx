@@ -17,7 +17,7 @@ export default function Footer() {
 
 
         {/* Social Icons Section */}
-        <div className="flex justify-center gap-5 mt-5 text-xl text-gray-600">
+        <div className="flex justify-center gap-5 mt-5 text-xl text-gray-500">
           <a 
             href="https://www.facebook.com/groups/1559222020902739/" 
             target="_blank" 
