@@ -1,0 +1,19 @@
+# Query: https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=300&auto=format&fit=crop
+# ContextLines: 1
+
+3 results - 3 files
+
+src\app\(private)\my-bookings\page.jsx:
+  6  
+  7: const RE_USABLE_FALLBACK = "https://t4.ftcdn.net/jpg/04/70/29/97/360_F_470299797_UD0eoVMMSUbHCcNJCdv2t8B2g1GVqYgs.jpg";
+  8  
+
+src\app\(private)\my-cars\page.jsx:
+   9  // একটি চিরস্থায়ী অনলাইন ইমেজ লিংক (যাতে কোনোভাবেই ৪MD৪ লুপ না হয়)
+  10: const RE_USABLE_FALLBACK = "https://t4.ftcdn.net/jpg/04/70/29/97/360_F_470299797_UD0eoVMMSUbHCcNJCdv2t8B2g1GVqYgs.jpg";
+  11  
+
+src\app\(public)\cars\[id]\page.jsx:
+  81            <img
+  82:             src={car.imageUrl || "https://t4.ftcdn.net/jpg/04/70/29/97/360_F_470299797_UD0eoVMMSUbHCcNJCdv2t8B2g1GVqYgs.jpg"}
+  83              alt={car.carName}
