@@ -66,7 +66,7 @@ export default function MyCarsPage() {
 
       {loading ? <Spinner /> : cars.length === 0 ? (
         <div className="text-center bg-white border border-amber-200 rounded-xl p-10">
-          <p className="text-gray-500 mb-4">You haven't added any cars yet.</p>
+          <p className="text-gray-500 mb-4">You haven't added any cars yet .</p>
           <button
             onClick={() => router.push("/add-car")}
             className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-2 rounded-full transition text-sm"
