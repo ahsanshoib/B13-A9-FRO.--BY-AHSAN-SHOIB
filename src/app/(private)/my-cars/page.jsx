@@ -6,7 +6,6 @@ import UpdateCarModal from "@/components/UpdateCarModal";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import toast from "react-hot-toast";
 
-
 const RE_USABLE_FALLBACK = "https://t4.ftcdn.net/jpg/04/70/29/97/360_F_470299797_UD0eoVMMSUbHCcNJCdv2t8B2g1GVqYgs.jpg";
 
 export default function MyCarsPage() {
@@ -46,9 +45,16 @@ export default function MyCarsPage() {
     if (!url || url.trim() === "" || url === "HH") {
       return RE_USABLE_FALLBACK;
     }
+    
+
+    if (url.startsWith("data:")) {
+      return url;
+    }
+
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url;
     }
+    
     return url.startsWith("/") ? url : `/${url}`;
   };
 
@@ -59,7 +65,7 @@ export default function MyCarsPage() {
       </h1>
 
       {loading ? <Spinner /> : cars.length === 0 ? (
-        <div className="text-center bg-amber-50 border border-amber-200 rounded-xl p-10">
+        <div className="text-center bg-white border border-amber-200 rounded-xl p-10">
           <p className="text-gray-500 mb-4">You haven't added any cars yet.</p>
           <button
             onClick={() => router.push("/add-car")}
@@ -73,21 +79,20 @@ export default function MyCarsPage() {
           {cars.map((car) => (
             <div
               key={car._id}
-              className="bg-amber-50 border border-amber-200 rounded-2xl shadow p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center"
+              className="bg-white border border-amber-200 rounded-2xl shadow p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center"
             >
               <img
-                src={getValidImageUrl(car.imageUrl)}
-                alt={car.carName}
+                src={getValidImageUrl(car.imageUrl || car.imgUrl || car.image)}
+                alt={car.carName || car.name || "Vintage Car"}
                 className="w-28 h-20 object-cover rounded-xl flex-shrink-0 bg-gray-200"
                 onError={(e) => {
-                  
                   e.target.onerror = null; 
                   e.target.src = RE_USABLE_FALLBACK;
                 }}
               />
               <div className="flex-1">
                 <p className="text-xs font-bold text-gray-500 uppercase">Car Name</p>
-                <p className="font-bold text-gray-800">{car.carName}</p>
+                <p className="font-bold text-gray-800">{car.carName || car.name || "Unknown Car"}</p>
                 <p className="text-xs font-bold text-gray-500 uppercase mt-1">Car Description</p>
                 <p className="text-xs text-gray-600 line-clamp-2">{car.description || "No description provided."}</p>
               </div>

@@ -4,30 +4,27 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import toast from "react-hot-toast";
+import { useSession, signOut } from "@/lib/auth-client";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   
-  const [user, setUser] = useState(null);
+  const { data: session, isPending } = useSession();
+  const user = session?.user;
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
+  const [isMounted, setIsMounted] = useState(false); 
   
   const dropdownRef = useRef(null); 
   const mobileMenuRef = useRef(null); 
+  
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        setUser(null);
-      }
-    }
-  }, [pathname]); 
+    setIsMounted(true);
+  }, []);
 
-  
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -43,24 +40,19 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include", 
+      await signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            setDropdownOpen(false);
+            setMobileMenuOpen(false);
+            toast.success("Logged out successfully");
+            router.push("/");
+            router.refresh();
+          }
+        }
       });
-
-      if (res.ok) {
-        localStorage.removeItem("user"); 
-        setUser(null);
-        setDropdownOpen(false);
-        setMobileMenuOpen(false);
-        toast.success("Logged out successfully");
-        router.push("/");
-        router.refresh(); 
-      } else {
-        toast.error("Logout failed");
-      }
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Something went wrong during logout");
     }
   };
 
@@ -87,11 +79,11 @@ export default function Navbar() {
           </div>
         </Link>
 
-        
+        {/* Navigation Links */}
         <ul className="hidden lg:flex items-center gap-8">
           <li><Link href="/" className={linkClass("/")}>Home</Link></li>
           <li><Link href="/explore" className={linkClass("/explore")}>Explore</Link></li>
-          {user && (
+          {isMounted && user && (
             <>
               <li><Link href="/add-car" className={linkClass("/add-car")}>Add Car</Link></li>
               <li><Link href="/my-bookings" className={linkClass("/my-bookings")}>Booking</Link></li>
@@ -103,7 +95,10 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           
           {/* Desktop User Dropdown Menu */}
-          {user ? (
+          {!isMounted || isPending ? (
+            
+            <div className="hidden lg:block w-20 h-8" />
+          ) : user ? (
             <div className="relative hidden lg:block" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -117,6 +112,10 @@ export default function Navbar() {
               
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-44 bg-amber-50 border border-amber-200 shadow-xl rounded-xl z-50 p-2 flex flex-col gap-1">
+                  <Link href="/my-profile" onClick={() => setDropdownOpen(false)} className="px-3 py-1.5 text-sm text-amber-950 font-bold hover:bg-amber-200/60 rounded-lg transition text-left">
+                    My Profile
+                  </Link>
+                  <hr className="border-amber-200 my-0.5" />
                   <Link href="/add-car" onClick={() => setDropdownOpen(false)} className="px-3 py-1.5 text-sm text-gray-700 hover:bg-amber-200/50 rounded-lg transition text-left">
                     Add Car
                   </Link>
@@ -154,8 +153,8 @@ export default function Navbar() {
               </svg>
             </button>
 
-            {/* Mobile & Tablet Pop-up Menu Layer */}
-            {mobileMenuOpen && (
+            {/* Mobile Menu Pop-up */}
+            {mobileMenuOpen && isMounted && (
               <div className="absolute right-0 mt-2 w-56 bg-amber-50 border border-amber-200 shadow-2xl rounded-2xl z-50 p-2 flex flex-col gap-1 origin-top-right transition-all">
                 
                 {user && (
@@ -174,6 +173,11 @@ export default function Navbar() {
 
                 {user ? (
                   <>
+                    <hr className="border-amber-200 my-0.5" />
+                    <Link href="/my-profile" onClick={() => setMobileMenuOpen(false)} className={mobileLinkClass("/my-profile")}>
+                      My Profile
+                    </Link>
+                    <hr className="border-amber-200 my-0.5" />
                     <Link href="/add-car" onClick={() => setMobileMenuOpen(false)} className={mobileLinkClass("/add-car")}>
                       Add Car
                     </Link>

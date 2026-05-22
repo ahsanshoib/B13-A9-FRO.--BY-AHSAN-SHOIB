@@ -3,20 +3,20 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import BookingModal from "@/components/BookingModal";
-import Spinner from "@/components/Spinner"; // যদি তোমার প্রজেক্টে Spinner থাকে, না থাকলে ডিভ ইউজ করতে পারো
+import Spinner from "@/components/Spinner"; 
 import { FaMapMarkerAlt, FaUsers, FaStar } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 export default function CarDetailsPage() {
   const router = useRouter();
-  const params = useParams(); // ক্লায়েন্ট কম্পোনেন্টে আইডি নেওয়ার জন্য useParams ব্যবহার করা হলো
+  const params = useParams(); 
   const id = params?.id;
 
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ১. প্রথমে চেক করবো ইউজার লগইন অবস্থায় আছে কি না
+    
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       toast.error("You must login first to view car details!");
@@ -24,7 +24,7 @@ export default function CarDetailsPage() {
       return;
     }
 
-    // ২. ইউজার লগইন থাকলে ব্যাকঅ্যান্ড থেকে গাড়ির ডিটেইলস ডেটা ফেচ করা হবে
+
     const fetchCarDetails = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cars/${id}`, {
@@ -46,7 +46,7 @@ export default function CarDetailsPage() {
     }
   }, [id, router]);
 
-  // লোডিং স্টেট দেখানোর জন্য
+  
   if (loading) {
     return (
       <div className="text-center py-20 flex flex-col items-center justify-center gap-3">
@@ -56,7 +56,7 @@ export default function CarDetailsPage() {
     );
   }
 
-  // যদি লগইন থাকে কিন্তু ডেটাবেজে এই আইডির কোনো গাড়ি না পাওয়া যায়
+  
   if (!car) {
     return (
       <div className="text-center py-20">
@@ -134,7 +134,7 @@ export default function CarDetailsPage() {
             <p className="text-sm text-gray-600 leading-relaxed">{car.description}</p>
           </div>
 
-          {/* বুকিং করার মোডাল */}
+        
           <BookingModal car={car} />
         </div>
       </div>

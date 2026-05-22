@@ -2,8 +2,9 @@ import Link from "next/link";
 
 async function getCars() {
   try {
+    
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}`/cars,
+      `${process.env.NEXT_PUBLIC_API_URL}/cars`,
       { cache: "no-store" }
     );
     if (!res.ok) return [];
@@ -13,34 +14,34 @@ async function getCars() {
   }
 }
 
-const stats = [
-  { value: "18+", label: "Cars" },
-  { value: "600+", label: "Clients" },
-  { value: "22+", label: "Drivers" },
-];
-
 const reviews = [
   {
-    name: "James Harrington",
-    role: "Classic Car Enthusiast",
+    name: "Hero Alam",
+    role: "Best Hero and Singer",
     review:
       "Good service! The car was in pristine condition and the whole booking experience was seamless. Truly a ride back in time.",
-    initials: "JH",
+    initials: "HA",
   },
   {
-    name: "Sofia Marchetti",
-    role: "Verified Client",
+    name: "Khairul Dewan",
+    role: "Upcoming PM",
     review:
       "Vinatge ride is the best! I rented a '67 Mustang for my anniversary and it was absolutely magical. The team was so professional.",
-    initials: "SM",
+    initials: "KD",
   },
   {
-    name: "Robert Laine",
-    role: "Vintage Collector",
+    name: "Choton Kaka",
+    role: "Winter Lover",
     review:
       "Exceptional attention to detail. Every vehicle felt like a rolling museum piece. Will definitely book again for our next event.",
-    initials: "RL",
+    initials: "CK",
   },
+];
+
+const stats = [
+  { value: "50+", label: "Cars" },
+  { value: "700+", label: "Clients" },
+  { value: "60+", label: "Drivers" },
 ];
 
 export default async function HomePage() {
@@ -72,26 +73,6 @@ export default async function HomePage() {
           >
             Explore Cars →
           </Link>
-        </div>
-      </section>
-
-      {/* ── Stats Section ── */}
-      <section className="bg-white py-16">
-        <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 gap-6 text-center">
-          {stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col items-center">
-              <span
-                className="text-5xl md:text-6xl font-extrabold text-amber-400"
-                style={{ fontFamily: "'Georgia', serif", letterSpacing: "-1px" }}
-              >
-                {stat.value}
-              </span>
-              <span className="mt-2 text-sm md:text-base font-semibold tracking-[0.25em] uppercase text-amber-400/70">
-                {stat.label}
-              </span>
-              <div className="mt-3 w-10 h-[2px] bg-amber-500/60 rounded-full" />
-            </div>
-          ))}
         </div>
       </section>
 
@@ -158,6 +139,25 @@ export default async function HomePage() {
         </div>
       </section>
 
+      
+      <section className="bg-white py-16">
+        <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 gap-6 text-center">
+          {stats.map((stat) => (
+            <div key={stat.label} className="flex flex-col items-center">
+              <span
+                className="text-5xl md:text-6xl font-extrabold text-amber-400"
+                style={{ fontFamily: "'Georgia', serif", letterSpacing: "-1px" }}
+              >
+                {stat.value}
+              </span>
+              <span className="mt-2 text-sm md:text-base font-semibold tracking-[0.25em] uppercase text-amber-400/70">
+                {stat.label}
+              </span>
+              <div className="mt-3 w-10 h-[2px] bg-amber-500/60 rounded-full" />
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

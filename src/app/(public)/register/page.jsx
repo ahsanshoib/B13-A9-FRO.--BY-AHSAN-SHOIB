@@ -1,166 +1,135 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
-import { useGoogleLogin } from "@react-oauth/google";
-
-function validatePassword(password) {
-  if (password.length < 6) return "Password must be at least 6 characters.";
-  if (!/[A-Z]/.test(password)) return "Password must have at least one uppercase letter.";
-  if (!/[a-z]/.test(password)) return "Password must have at least one lowercase letter.";
-  return null;
-}
+import { authClient } from "@/lib/auth-client";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", photoURL: "", password: "" });
-  const [passwordError, setPasswordError] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [photoUrl, setPhotoUrl] = useState(""); 
   const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    if (e.target.name === "password") setPasswordError("");
-  };
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  // কাস্টম ফর্ম সাবমিট রেজিস্ট্রেশন হ্যান্ডলার
   const handleRegister = async (e) => {
     e.preventDefault();
-    const err = validatePassword(form.password);
-    if (err) { setPasswordError(err); return; }
-
     setLoading(true);
+
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          password: form.password,
-          image: form.photoURL 
-        }),
+      await authClient.signUp.email({
+        email,
+        password,
+        name,
+        image: photoUrl || undefined, 
+        callbackURL: "/",
+      }, {
+        onSuccess: () => {
+          toast.success("Account created successfully!");
+          router.push("/");
+          router.refresh();
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message || "Registration failed. Try again.");
+        }
       });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        toast.success("Account created successfully! Please login.");
-        router.push("/login");
-      } else {
-        toast.error(data.message || "Registration failed");
-      }
     } catch {
-      toast.error("Registration failed. Try again.");
+      toast.error("Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
 
-
-  const issueJWT = async (email, name) => {
-    // এখানে এক্সট্রা /api কেটে ক্লিন পাথ করা হলো
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email, name }),
-    });
-    return res;
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "http://localhost:3000/",
+      });
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   };
 
-  // গুগল ওঅথ রেজিস্ট্রেশন হ্যান্ডলার
-  const handleGoogleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setLoading(true);
-      try {
-        // এখানে Bearer স্ট্রিং লিটারেল ব্যাকটিক দিয়ে ফিক্স করা হলো
-        const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        const googleUser = await res.json();
-
-        if (googleUser?.email) {
-          const jwtRes = await issueJWT(googleUser.email, googleUser.name);
-          
-          if (jwtRes.ok) {
-            toast.success("Google Registration & Login successful!");
-            const userData = { email: googleUser.email, name: googleUser.name };
-            localStorage.setItem("user", JSON.stringify(userData));
-            router.push("/");
-            router.refresh();
-          } else {
-            toast.error("Failed to sync session with server");
-          }
-        } else {
-          toast.error("Failed to get user information from Google");
-        }
-      } catch (err) {
-        toast.error("Google login failed during token generation");
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: () => {
-      toast.error("Google registration failed");
-    },
-  });
+  if (!isMounted) {
+    return <div className="fixed inset-0 bg-amber-50" />;
+  }
 
   return (
     <div
-     className="min-h-screen flex items-center justify-center px-4"
+      className="fixed inset-0 z-50 w-screen h-screen flex items-center justify-center px-4 overflow-y-auto py-6"
       style={{
         backgroundImage: "url('/hero-banner.png')",
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
       }}
     >
-      <div className="absolute inset-0 bg-amber-900/30" />
+      
+      <div className="absolute inset-0 bg-amber-900/40" />
 
-      <div className="relative z-10 bg-amber-50 border border-amber-200 rounded-2xl shadow-xl p-7 w-full max-w-sm">
+      
+      <div className="relative z-10 bg-amber-50 border border-amber-200 rounded-2xl shadow-xl p-7 w-full max-w-sm my-auto">
         <h2 className="text-xl font-extrabold text-red-800 uppercase text-center mb-5">
           Register
         </h2>
 
         <form onSubmit={handleRegister} className="flex flex-col gap-3">
-          {[
-            { label: "Name", name: "name", type: "text", placeholder: "Your full name" },
-            { label: "Email", name: "email", type: "email", placeholder: "Email" },
-            { label: "Photo URL", name: "photoURL", type: "url", placeholder: "https://..." },
-          ].map((field) => (
-            <div key={field.name}>
-              <label className="text-xs font-semibold text-gray-600 uppercase block mb-1">
-                {field.label}
-              </label>
-              <input
-                type={field.type}
-                name={field.name}
-                placeholder={field.placeholder}
-                value={form[field.name]}
-                onChange={handleChange}
-                required={field.name !== "photoURL"}
-                className="w-full border border-amber-300 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
-              />
-            </div>
-          ))}
+          <div>
+            <label className="text-xs font-semibold text-gray-600 uppercase block mb-1">Full Name</label>
+            <input
+              type="text"
+              placeholder="Your Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="w-full border border-amber-300 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-gray-600 uppercase block mb-1">Email</label>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full border border-amber-300 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </div>
 
           <div>
             <label className="text-xs font-semibold text-gray-600 uppercase block mb-1">Password</label>
             <input
               type="password"
-              name="password"
               placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
-              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 ${
-                passwordError ? "border-red-400" : "border-amber-300"
-              } bg-white`}
+              className="w-full border border-amber-300 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
             />
-            {passwordError && (
-              <p className="text-red-600 text-xs mt-1">{passwordError}</p>
-            )}
+          </div>
+
+          
+          <div>
+            <label className="text-xs font-semibold text-gray-600 uppercase block mb-1">Photo URL (Optional)</label>
+            <input
+              type="url"
+              placeholder="https://example.com/photo.jpg"
+              value={photoUrl}
+              onChange={(e) => setPhotoUrl(e.target.value)}
+              className="w-full border border-amber-300 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
           </div>
 
           <button
@@ -168,16 +137,16 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full bg-red-800 hover:bg-red-900 text-white font-semibold py-2 rounded-lg transition text-sm mt-1 disabled:opacity-60"
           >
-            {loading ? "Registering..." : "Register"}
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
 
         <button
-          onClick={() => handleGoogleLogin()}
+          onClick={handleGoogleLogin}
           disabled={loading}
           className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 rounded-lg transition text-sm mt-3 disabled:opacity-60"
         >
-          <FcGoogle size={18} /> Google Login
+          <FcGoogle size={18} /> {loading ? "Connecting..." : "Google Login"}
         </button>
 
         <p className="text-xs text-center text-gray-500 mt-4">

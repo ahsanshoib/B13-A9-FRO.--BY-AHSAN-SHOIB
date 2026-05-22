@@ -1,51 +1,41 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
-import { useGoogleLogin } from "@react-oauth/google";
+import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const issueJWT = async (email, name) => {
-    
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email, name }),
-    });
-    return res;
-  };
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", 
-        body: JSON.stringify({ email, password }),
+      await authClient.signIn.email({
+        email,
+        password,
+        callbackURL: "/", 
+      }, {
+        onSuccess: () => {
+          toast.success("Login successful!");
+          router.push("/");
+          router.refresh();
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message || "Invalid email or password");
+        }
       });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        toast.success("Login successful!");
-        
-        localStorage.setItem("user", JSON.stringify(data.user));
-        
-        router.push("/");
-        router.refresh(); 
-      } else {
-        toast.error(data.message || "Invalid email or password");
-      }
     } catch {
       toast.error("Login failed. Please try again.");
     } finally {
@@ -53,55 +43,39 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setLoading(true);
-      try {
-        
-        const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        const googleUser = await res.json();
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "http://localhost:3000/",
+      });
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
 
-        if (googleUser?.email) {
-          const jwtRes = await issueJWT(googleUser.email, googleUser.name);
-          
-          if (jwtRes.ok) {
-            toast.success("Google Login successful!");
-            const userData = { email: googleUser.email, name: googleUser.name };
-            localStorage.setItem("user", JSON.stringify(userData));
-            
-            router.push("/");
-            router.refresh();
-          } else {
-            toast.error("Failed to sync session with server");
-          }
-        } else {
-          toast.error("Failed to get user information from Google");
-        }
-      } catch (err) {
-        toast.error("Google login failed during token generation");
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: () => {
-      toast.error("Google login failed");
-    },
-  });
+  if (!isMounted) {
+    return <div className="fixed inset-0 bg-amber-50" />;
+  }
 
   return (
+    
     <div
-      className="min-h-screen flex items-center justify-center px-4"
+      className="fixed inset-0 z-50 w-screen h-screen flex items-center justify-center px-4 overflow-y-auto"
       style={{
         backgroundImage: "url('/hero-banner.png')",
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
       }}
     >
-      <div className="absolute inset-0 bg-amber-900/30" />
+      
+      <div className="absolute inset-0 bg-amber-900/40" />
 
-      <div className="relative z-10 bg-amber-50 border border-amber-200 rounded-2xl shadow-xl p-7 w-full max-w-sm">
+  
+      <div className="relative z-10 bg-amber-50 border border-amber-200 rounded-2xl shadow-xl p-7 w-full max-w-sm my-auto">
         <h2 className="text-xl font-extrabold text-red-800 uppercase text-center mb-5">
           Login
         </h2>
@@ -140,11 +114,11 @@ export default function LoginPage() {
         </form>
 
         <button
-          onClick={() => handleGoogleLogin()}
+          onClick={handleGoogleLogin}
           disabled={loading}
           className="w-full flex items-center justify-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 rounded-lg transition text-sm mt-3 disabled:opacity-60"
         >
-          <FcGoogle size={18} /> Google Login
+          <FcGoogle size={18} /> {loading ? "Connecting..." : "Google Login"}
         </button>
 
         <p className="text-xs text-center text-gray-500 mt-4">

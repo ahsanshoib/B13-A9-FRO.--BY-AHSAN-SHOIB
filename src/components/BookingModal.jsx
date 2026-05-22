@@ -15,11 +15,11 @@ export default function BookingModal({ car }) {
     setLoading(true);
 
     try {
-      // এখানে /api কেটে শুধু ক্লিন পাথ (/bookings) করা হলো
+      
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // কুকি টোকেন পাঠানোর জন্য 
+        credentials: "include", 
         body: JSON.stringify({
           carId: car._id,
           driverNeeded,
