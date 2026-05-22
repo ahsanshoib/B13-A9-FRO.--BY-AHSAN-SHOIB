@@ -143,7 +143,7 @@ export default function AddCarPage() {
 
             </div>
 
-            {/* Pickup Location */}
+            
             <div>
 
               <label className="text-xs font-bold text-gray-600 uppercase block mb-1">

@@ -31,7 +31,7 @@ export default function DeleteConfirmModal({ car, onClose, onSuccess }) {
       <div className="bg-amber-50 border border-amber-200 rounded-2xl shadow-xl p-6 w-full max-w-sm text-center">
         <h3 className="text-xl font-bold text-red-800 uppercase mb-3">Delete Car?</h3>
         <p className="text-sm text-gray-600 mb-6">
-          Are you sure you want to delete <span className="font-semibold">{car?.carName}</span>? This action cannot be undone.
+          Are you sure you want to delete ? <span className="font-semibold">{car?.carName}</span>? This action cannot be undone.
         </p>
         <div className="flex gap-3">
           <button onClick={onClose}
