@@ -183,7 +183,7 @@ export default function AddCarPage() {
 
             </div>
 
-            {/* Seat Capacity */}
+          
             <div>
 
               <label className="text-xs font-bold text-gray-600 uppercase block mb-1">
