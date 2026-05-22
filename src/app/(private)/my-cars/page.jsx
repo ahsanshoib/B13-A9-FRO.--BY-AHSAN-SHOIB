@@ -60,7 +60,7 @@ export default function MyCarsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-extrabold text-red-700 text-center uppercase mb-8">
+      <h1 className="text-3xl font-extrabold text-red-800 text-center uppercase mb-8">
         My Added Cars
       </h1>
 
