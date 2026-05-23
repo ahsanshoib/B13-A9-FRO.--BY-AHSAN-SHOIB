@@ -5,6 +5,9 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 export const metadata = {
   title: "DriveFleet — Premium Car Rental",
   description: "Rent premium cars at the best prices",
+  icons: {
+    icon: "data:;base64,=", 
+  },
 };
 
 export default function RootLayout({ children }) {

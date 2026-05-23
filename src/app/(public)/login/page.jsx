@@ -48,7 +48,7 @@ export default function LoginPage() {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "http://localhost:3000/",
+        callbackURL: '/',
       });
     } catch (err) {
       console.error(err);

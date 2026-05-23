@@ -253,7 +253,7 @@ export default function MyBookingsPage() {
 
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-xl text-xs uppercase tracking-wide transition"
+                  className="bg-gray-100 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-xl text-xs uppercase tracking-wide transition"
                 >
                   No, Keep it!
                 </button>

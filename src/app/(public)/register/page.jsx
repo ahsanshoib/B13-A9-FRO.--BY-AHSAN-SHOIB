@@ -29,7 +29,7 @@ export default function RegisterPage() {
         password,
         name,
         image: photoUrl || undefined, 
-        callbackURL: "/",
+        callbackURL: "/login",
       }, {
         onSuccess: () => {
           toast.success("Account created successfully!");
@@ -52,7 +52,7 @@ export default function RegisterPage() {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "http://localhost:3000/",
+        callbackURL: '/',
       });
     } catch (err) {
       console.error(err);
